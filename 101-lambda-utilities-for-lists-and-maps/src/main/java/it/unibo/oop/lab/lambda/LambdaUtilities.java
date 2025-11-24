@@ -2,6 +2,7 @@ package it.unibo.oop.lab.lambda;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,9 +13,6 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 
 /**
  * This class will contain four utility functions on lists and maps, of which the first one is provided as example.
@@ -64,7 +62,9 @@ public final class LambdaUtilities {
         /*
          * Suggestion: consider Optional.filter
          */
-        return emptyList();
+        final List<Optional<T>> o = new ArrayList<>(list.size());
+        list.forEach(t -> o.add(Optional.of(t).filter(pre)));
+        return o;
     }
 
     /**
@@ -80,10 +80,17 @@ public final class LambdaUtilities {
      *         based on the mapping done by the function
      */
     public static <R, T> Map<R, Set<T>> group(final List<T> list, final Function<T, R> op) {
+        final Map<R, Set<T>> g = new HashMap<>();
+        list.forEach(t -> {
+            g.merge(op.apply(t), new HashSet<>(Set.of(t)), (existing, newValue) -> {
+                existing.addAll(newValue);
+                return existing;
+            });
+        });
         /*
          * Suggestion: consider Map.merge
          */
-        return emptyMap();
+        return g;
     }
 
     /**
@@ -99,12 +106,17 @@ public final class LambdaUtilities {
      *         by the supplier
      */
     public static <K, V> Map<K, V> fill(final Map<K, Optional<V>> map, final Supplier<V> def) {
+
+        final Map<K, V> f = new HashMap<>();
+        map.forEach((k, v) -> {
+            f.put(k, v.orElse(def.get()));
+        });
         /*
          * Suggestion: consider Optional.orElse
          *
          * Keep in mind that a map can be iterated through its forEach method
          */
-        return emptyMap();
+        return f;
     }
 
     /**
